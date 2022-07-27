@@ -14,8 +14,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by adolli on 2017/7/19.
@@ -115,7 +117,10 @@ public class Node extends AbstractNode {
                 } else {
                     ret = true;
                     AccessibilityNodeInfo parent = node.getParent();
-                    while (parent != null) {
+                    Set<AccessibilityNodeInfo> trace = new HashSet<>();
+                    trace.add(node);
+                    while (parent != null && !trace.contains(parent)) {
+                        trace.add(parent);
                         boolean parentVisible = parent.isVisibleToUser();
                         if (!parentVisible) {
                             ret = false;
