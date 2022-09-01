@@ -34,7 +34,7 @@ public class Selector implements ISelector<AbstractNode> {
     public AbstractNode[] select(JSONArray cond, boolean multiple) throws JSONException {
         List<AbstractNode> result = null;
         try {
-            result = this.selectImpl(cond, multiple, this.getRoot(), 9999, true, true);
+            result = this.selectImpl(cond, multiple, this.getRoot(), 999, true, true);
         } catch (NodeHasBeenRemovedException e) {
             // 如果Node被移除，表示traverse过程中界面发生了变化，那就直接返回空list，表示找不到
             result = new LinkedList<>();
