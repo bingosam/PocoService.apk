@@ -1,12 +1,17 @@
 package com.netease.open.libpoco.sdk;
 
+import android.view.accessibility.AccessibilityNodeInfo;
+
+import com.netease.open.libpoco.Node;
 import com.netease.open.libpoco.sdk.exceptions.NodeHasBeenRemovedException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by adolli on 2017/7/12.
@@ -105,13 +110,14 @@ public class Selector implements ISelector<AbstractNode> {
                 }
             }
         } else {
-            this.selectTraverse(cond, root, result, multiple, maxDepth, onlyVisibleNode, includeRoot);
+            Set<AccessibilityNodeInfo> trace = new HashSet<>();
+            this.selectTraverse(trace, cond, root, result, multiple, maxDepth, onlyVisibleNode, includeRoot);
         }
 
         return result;
     }
 
-    private boolean selectTraverse(JSONArray cond, AbstractNode node, List<AbstractNode> outResult, boolean multiple, int maxDepth, boolean onlyVisibleNode, boolean includeRoot) throws JSONException {
+    private boolean selectTraverse(Set<AccessibilityNodeInfo> trace, JSONArray cond, AbstractNode node, List<AbstractNode> outResult, boolean multiple, int maxDepth, boolean onlyVisibleNode, boolean includeRoot) throws JSONException {
         // 剪掉不可见节点branch
         Object size = node.getAttr("size");
         // 假如node.visible=false，就直接剪掉
@@ -146,7 +152,13 @@ public class Selector implements ISelector<AbstractNode> {
         maxDepth -= 1;
 
         for (AbstractNode child : node.getChildren()) {
-            boolean finished = this.selectTraverse(cond, child, outResult, multiple, maxDepth, onlyVisibleNode, true);
+            if (child instanceof Node) {
+                if (trace.contains(((Node) child).node)) {
+                    continue;
+                }
+                trace.add(((Node) child).node);
+            }
+            boolean finished = this.selectTraverse(trace, cond, child, outResult, multiple, maxDepth, onlyVisibleNode, true);
             if (finished) {
                 return true;
             }
