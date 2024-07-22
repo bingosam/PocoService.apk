@@ -8,9 +8,11 @@ import com.netease.open.libpoco.sdk.exceptions.NodeHasBeenRemovedException;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -110,14 +112,14 @@ public class Selector implements ISelector<AbstractNode> {
                 }
             }
         } else {
-            Set<AccessibilityNodeInfo> trace = new HashSet<>();
+            Map<AccessibilityNodeInfo, Integer> trace = new HashMap<>();
             this.selectTraverse(trace, cond, root, result, multiple, maxDepth, onlyVisibleNode, includeRoot);
         }
 
         return result;
     }
 
-    private boolean selectTraverse(Set<AccessibilityNodeInfo> trace, JSONArray cond, AbstractNode node, List<AbstractNode> outResult, boolean multiple, int maxDepth, boolean onlyVisibleNode, boolean includeRoot) throws JSONException {
+    private boolean selectTraverse(Map<AccessibilityNodeInfo, Integer> trace, JSONArray cond, AbstractNode node, List<AbstractNode> outResult, boolean multiple, int maxDepth, boolean onlyVisibleNode, boolean includeRoot) throws JSONException {
         // 剪掉不可见节点branch
         Object size = node.getAttr("size");
         // 假如node.visible=false，就直接剪掉
@@ -153,10 +155,11 @@ public class Selector implements ISelector<AbstractNode> {
 
         for (AbstractNode child : node.getChildren()) {
             if (child instanceof Node) {
-                if (trace.contains(((Node) child).node)) {
+                int count = trace.getOrDefault(((Node) child).node, 0);
+                if (count > 10) {
                     continue;
                 }
-                trace.add(((Node) child).node);
+                trace.put(((Node) child).node, count + 1);
             }
             boolean finished = this.selectTraverse(trace, cond, child, outResult, multiple, maxDepth, onlyVisibleNode, true);
             if (finished) {

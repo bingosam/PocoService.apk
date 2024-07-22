@@ -9,9 +9,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by adolli on 2017/7/10.
@@ -26,11 +26,11 @@ public abstract class AbstractDumper implements IDumper<AbstractNode> {
     }
 
     public JSONObject dumpHierarchy(boolean onlyVisibleNode) throws JSONException {
-        Set<AccessibilityNodeInfo> trace = new HashSet<>();
+        Map<AccessibilityNodeInfo, Integer> trace = new HashMap<>();
         return this.dumpHierarchyImpl(trace, this.getRoot(), onlyVisibleNode);
     }
 
-    public JSONObject dumpHierarchyImpl(Set<AccessibilityNodeInfo> trace, AbstractNode node, boolean onlyVisibleNode) throws JSONException {
+    public JSONObject dumpHierarchyImpl(Map<AccessibilityNodeInfo, Integer> trace, AbstractNode node, boolean onlyVisibleNode) throws JSONException {
         if (node == null) {
             // return if still null
             return null;
@@ -45,15 +45,15 @@ public abstract class AbstractDumper implements IDumper<AbstractNode> {
         JSONArray children = new JSONArray();
         for (AbstractNode child : node.getChildren()) {
             if (child instanceof Node) {
-                if (trace.contains(((Node) child).node)) {
+                int count = trace.getOrDefault(((Node) child).node, 0);
+                if (count > 10) {
                     continue;
                 }
-                trace.add(((Node) child).node);
+                trace.put(((Node) child).node, count + 1);
             }
             if (!onlyVisibleNode || (boolean) child.getAttr("visible")) {
                 children.put(this.dumpHierarchyImpl(trace, child, onlyVisibleNode));
-            }
-            else if(String.valueOf(child.getAttr("type")).endsWith(".WebView")){
+            } else if (String.valueOf(child.getAttr("type")).endsWith(".WebView")) {
                 // 这个改动主要是一些WebView如果使用了tbs引擎，会因为isVisibleToUser返回false而导致无法获取节点
                 // 测试时使用了腾讯自选股app的基金页面进行复现
                 children.put(this.dumpHierarchyImpl(trace, child, false));
