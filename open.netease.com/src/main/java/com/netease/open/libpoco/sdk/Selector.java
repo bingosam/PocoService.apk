@@ -156,7 +156,7 @@ public class Selector implements ISelector<AbstractNode> {
         for (AbstractNode child : node.getChildren()) {
             if (child instanceof Node) {
                 int count = trace.getOrDefault(((Node) child).node, 0);
-                if (count > 10) {
+                if (count > 3) {
                     continue;
                 }
                 trace.put(((Node) child).node, count + 1);

@@ -27,7 +27,8 @@ public abstract class AbstractDumper implements IDumper<AbstractNode> {
 
     public JSONObject dumpHierarchy(boolean onlyVisibleNode) throws JSONException {
         Map<AccessibilityNodeInfo, Integer> trace = new HashMap<>();
-        return this.dumpHierarchyImpl(trace, this.getRoot(), onlyVisibleNode);
+        JSONObject ret = this.dumpHierarchyImpl(trace, this.getRoot(), onlyVisibleNode);
+        return ret;
     }
 
     public JSONObject dumpHierarchyImpl(Map<AccessibilityNodeInfo, Integer> trace, AbstractNode node, boolean onlyVisibleNode) throws JSONException {
@@ -46,7 +47,7 @@ public abstract class AbstractDumper implements IDumper<AbstractNode> {
         for (AbstractNode child : node.getChildren()) {
             if (child instanceof Node) {
                 int count = trace.getOrDefault(((Node) child).node, 0);
-                if (count > 10) {
+                if (count > 3) {
                     continue;
                 }
                 trace.put(((Node) child).node, count + 1);
