@@ -75,12 +75,11 @@ public class ServerForHierarchyViewer extends NanoHTTPD {
                 JSONObject connectionState = new JSONObject();
                 try {
                     try {
-                        this.uiConn.get().getRootInActiveWindow();
-                        connectionState.put("connected", true);
+                        connectionState.put("connected", this.dumper.hasChildren());
                     } catch (IllegalStateException e) {
                         connectionState.put("connected", false);
                     }
-                }  catch (JSONException e2) {
+                } catch (JSONException e2) {
                 }
                 ret = connectionState.toString();
                 mimeType = "application/json; charset=utf-8";

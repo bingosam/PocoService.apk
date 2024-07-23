@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -27,8 +26,7 @@ public abstract class AbstractDumper implements IDumper<AbstractNode> {
 
     public JSONObject dumpHierarchy(boolean onlyVisibleNode) throws JSONException {
         Map<AccessibilityNodeInfo, Integer> trace = new HashMap<>();
-        JSONObject ret = this.dumpHierarchyImpl(trace, this.getRoot(), onlyVisibleNode);
-        return ret;
+        return this.dumpHierarchyImpl(trace, this.getRoot(), onlyVisibleNode);
     }
 
     public JSONObject dumpHierarchyImpl(Map<AccessibilityNodeInfo, Integer> trace, AbstractNode node, boolean onlyVisibleNode) throws JSONException {
@@ -68,6 +66,16 @@ public abstract class AbstractDumper implements IDumper<AbstractNode> {
         result.put("payload", payload);
 
         return result;
+    }
+
+    public boolean hasChildren() {
+        AbstractNode root = this.getRoot();
+        for (AbstractNode child : root.getChildren()) {
+            if ((boolean) child.getAttr("visible") || String.valueOf(child.getAttr("type")).endsWith(".WebView")) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
